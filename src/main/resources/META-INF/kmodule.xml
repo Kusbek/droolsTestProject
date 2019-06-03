@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kmodule xmlns="http://www.drools.org/xsd/kmodule" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <kbase name="recycler" eventProcessingMode="stream" packages="rules.recycler">
+        <ruleTemplate dtable="rules/recycler/recyclers.xls"
+                      template="rules/recycler/recycling.drt"
+                      row="5" col="1"/>
+        <ruleTemplate dtable="rules/recycler/recyclers.xls"
+                      template="rules/recycler/set-recycler-speed.drt"
+                      row="39" col="1"/>                                                                                                                                              
+        <ksession name="recyclerRecyclingKS" type="stateful" default="false"/>
+    </kbase>
+</kmodule>

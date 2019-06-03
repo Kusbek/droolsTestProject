@@ -1,0 +1,76 @@
+template header
+	code
+	driverCode
+	driverDegree
+	manufacturer
+	model
+	width
+	depth
+	
+	
+	package rules.recycler;
+	import com.sample.*
+	import java.math.*;
+	dialect "mvel"
+	
+	template "Recycler Parameters"
+
+  	  rule "insert_default_suitable_recycler_@{row.rowNumber}"
+		  when
+		  	 	$work: Work()
+  	 			$thickness: WorkParameter(code == "THICKNESS", (Double.parseDouble("@{depth}")/10)-Double.parseDouble(value)>=0.1, work == $work.getId)
+		  	 	not(Resource(type=="EQUIPMENT", code.startsWith("@{code}".substring(0,9))== true, work==$work.getId))
+		  then
+		  		Resource $equipment = new Resource()
+		  		$equipment.setId("R1")
+		  		$equipment.setCode("@{code}")
+		  		$equipment.setName("@{manufacturer}")
+		  		$equipment.setType("EQUIPMENT")
+		  		$equipment.setUnit("маш-час")
+		  		$equipment.setQuantity("1")
+  				$equipment.setWork($work.getId)
+		  		insert ($equipment)
+	  end
+	  
+  	rule "set_recycler_efficiency_@{row.rowNumber}"
+		  when
+		  	$work: Work()
+		  	$speed: WorkParameter(code == "MAX-SPEED", work == $work.getId)
+		  	$equipment: Resource(code == "@{code}", type == "EQUIPMENT", work == $work.getId())
+		  then
+		  	double V = Double.parseDouble($speed.getValue);
+		  	double efficiency = 1/((Double.parseDouble("@{width}")/1000) * V * 60);
+		  	
+  	  		BigDecimal output = new BigDecimal(String.valueOf(efficiency)).setScale(6, BigDecimal.ROUND_HALF_UP);
+  	 		String amount = output.toString()
+  	 		modify($equipment){setAmount(amount)}
+  	 		modify($equipment){setName("@{manufacturer}")}
+  	 		insert (new Resource( "E1", "@{driverCode}",  "Машинист ресайклера (Разряд @{driverDegree})","LABOR", amount, "чел-час","1",$equipment.getId(),$work.getId()))
+  	 		ResourceOptions $equipmentList = new ResourceOptions();
+	        $equipmentList.setId("R2");
+	        $equipmentList.setResource($equipment.getId);
+	        $equipmentList.setName("RECYCLERS");
+	        $equipmentList.setWork($work.getId);
+	        insert($equipmentList)
+	 end
+	 
+ 	 rule "select_set_of_recyclers_@{row.rowNumber}"
+		  when
+		  	 	$work: Work()
+  	 	  	 	$thickness: WorkParameter(code == "THICKNESS", (Double.parseDouble("@{depth}")/10)-Double.parseDouble(value)>=0.1, work == $work.getId)
+		  	 	$equipment: Resource(code.startsWith("@{code}".substring(0,9))== true, work == $work.getId)
+		  	 	$equipmentList: ResourceOptions(resource == $equipment.getId, work == $work.getId)
+		  then
+		  		Resource equipment = new Resource()
+		  		equipment.setId($equipmentList.getResource)
+		  		equipment.setCode("@{code}")
+		  		equipment.setName("@{manufacturer} @{model}")
+		  		equipment.setType("EQUIPMENT")
+		  		equipment.setUnit("маш-час")
+		  		equipment.setQuantity("1")
+  				equipment.setWork($work.getId)
+		  		modify($equipmentList){addResource(equipment)}
+
+	  end
+		  
+	end template

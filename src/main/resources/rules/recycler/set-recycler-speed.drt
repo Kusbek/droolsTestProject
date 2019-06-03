@@ -1,0 +1,26 @@
+template header
+	thickness
+	speed
+
+	
+	package rules.recycler;
+	import com.sample.*
+	
+	dialect "mvel"
+	
+	template "set recycler speed"
+	
+		rule "set_speed_@{row.rowNumber}"
+		  when
+		  	$work:Work()
+		  	$thickness: WorkParameter(code == "THICKNESS", value == "@{thickness}",work == $work.getId())
+		  then
+		  	WorkParameter $speed = new WorkParameter();
+		  	$speed.setId("");
+		  	$speed.setName("Скорость");
+		  	$speed.setCode("MAX-SPEED");
+		  	$speed.setValue("@{speed}");
+		  	$speed.setWork($work.getId);
+		  	insert($speed)
+		  end
+	end template

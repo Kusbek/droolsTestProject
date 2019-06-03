@@ -1,0 +1,46 @@
+
+package expert
+
+//list any import classes here.
+import com.sample.*;
+import java.math.*;
+dialect "mvel"
+
+rule "show all work"
+salience 120
+	when
+		$resPar: Work()
+	then
+		System.out.println($resPar.getName());
+end
+rule "show all resourceslists"
+salience -50
+	when
+		$resPar: ResourceOptions()
+	then
+		System.out.println($resPar.getName()+", "+ $resPar.getResources()+", "+$resPar.getId());
+end
+
+rule "show all resources"
+salience -50
+	when
+		$res: Resource()
+	then
+		System.out.println($res.getType()+", "+ $res.getName()+", "+$res.getId()+", "+$res.getCode()+", "+$res.getAmount()+", "+$res.getUnit()+", " + $res.getDependency);
+end
+
+rule "show all resources work parameters"
+salience 0
+	when
+		$resPar: WorkParameter()
+	then
+		System.out.println($resPar.getName()+", "+ $resPar.getValue()+", "+$resPar.getId()+", "+$resPar.getWork());
+end
+
+rule "show all resource parameters"
+salience 0
+	when
+		$resPar: ResourceParameter()
+	then
+		System.out.println($resPar.getName()+", "+ $resPar.getValue()+", "+$resPar.getId());
+end
